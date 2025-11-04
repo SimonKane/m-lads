@@ -9,6 +9,7 @@ import { Incident } from './types/Incident';
 import { fetchIncidents } from './services/incidentService';
 import { convertIncidentsToStatusMessages } from './utils/incidentMapper';
 import { mockIncidents } from './utils/mockIncidents';
+import ErrorTester from './components/ErrorTester';
 
 function App() {
   const [messages, setMessages] = useState<StatusMessage[]>([]);
@@ -92,6 +93,8 @@ function App() {
         </div>
       )}
       <StatusMessages messages={messages} />
+      <ErrorTester onIncidentCreated={fetchIncidents} />
+
     </>
   );
 }
