@@ -2,11 +2,11 @@
   "name": "incident-backend",
   "version": "1.0.0",
   "description": "Backend för AI-driven incidenthantering",
-  "main": "dist/index.js",
+  "main": "dist/server.js",
   "scripts": {
-    "dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts",
+    "dev": "nodemon --watch src --ext ts --exec ts-node src/server.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/server.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
