@@ -8,7 +8,12 @@ export interface Incident {
   createdAt: Date
   aiAnalysis?: {
     type: string
-    action: string
+    action:
+      | "restart_service"
+      | "scale_up"
+      | "clear_cache"
+      | "notify_human"
+      | "none"
     target: string | null
     priority: string
     recommendation: string
@@ -41,7 +46,7 @@ export const incidentArray: Incident[] = [
     createdAt: new Date("2025-01-04T08:30:00"),
     aiAnalysis: {
       type: "Database Performance",
-      action: "Investigate and optimize database connection pool",
+      action: "scale_up",
       target: null,
       priority: "critical",
       recommendation:
@@ -58,7 +63,7 @@ export const incidentArray: Incident[] = [
     createdAt: new Date("2025-01-04T09:15:00"),
     aiAnalysis: {
       type: "API Integration",
-      action: "Implement rate limiting and caching",
+      action: "notify_human",
       target: null,
       priority: "high",
       recommendation:
@@ -72,6 +77,14 @@ export const incidentArray: Incident[] = [
     status: "resolved",
     priority: "medium",
     createdAt: new Date("2025-01-03T14:20:00"),
+    aiAnalysis: {
+      type: "Cache Performance",
+      action: "clear_cache",
+      target: null,
+      priority: "medium",
+      recommendation:
+        "Clear cache and monitor memory usage. Consider implementing cache eviction policies.",
+    },
   },
   {
     id: "incident-4",
@@ -80,6 +93,14 @@ export const incidentArray: Incident[] = [
     status: "open",
     priority: "high",
     createdAt: new Date("2025-01-04T07:00:00"),
+    aiAnalysis: {
+      type: "Security",
+      action: "notify_human",
+      target: null,
+      priority: "high",
+      recommendation:
+        "Renew SSL certificate immediately to prevent service disruption.",
+    },
   },
   {
     id: "incident-5",
@@ -90,7 +111,7 @@ export const incidentArray: Incident[] = [
     createdAt: new Date("2025-01-02T11:45:00"),
     aiAnalysis: {
       type: "Frontend",
-      action: "Update responsive CSS styles",
+      action: "none",
       target: null,
       priority: "low",
       recommendation:
