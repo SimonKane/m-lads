@@ -3,20 +3,38 @@
 // ============================================
 
 import { useState } from "react";
-import { StatusMessage, StatusPriority, AIStatus, ReportStatus } from "../types/StatusMessage";
+import {
+  StatusMessage,
+  StatusPriority,
+  AIStatus,
+  ReportStatus,
+} from "../types/StatusMessage";
 import "./statusMessages.css";
 
 interface StatusMessagesProps {
   messages: StatusMessage[];
 }
 
-type FilterType = "all" | "critical" | "high" | "medium" | "low";
-type SortType = "priority-desc" | "priority-asc" | "alphabetical-asc" | "alphabetical-desc" | "type-asc";
+type PriorityFilterType = "all" | "critical" | "high" | "medium" | "low";
+type StatusFilterType =
+  | "all"
+  | "open"
+  | "investigating"
+  | "resolved"
+  | "closed";
+type SortType =
+  | "priority-desc"
+  | "priority-asc"
+  | "alphabetical-asc"
+  | "alphabetical-desc"
+  | "type-asc";
 
 const StatusMessages = ({ messages }: StatusMessagesProps) => {
-  const [filter, setFilter] = useState<FilterType>("all");
+  const [priorityFilter, setPriorityFilter] =
+    useState<PriorityFilterType>("all");
+  const [statusFilter, setStatusFilter] = useState<StatusFilterType>("all");
   const [sort, setSort] = useState<SortType>("priority-desc");
-  
+
   const getPriorityColor = (priority: StatusPriority) => {
     switch (priority) {
       case "critical":
@@ -139,37 +157,126 @@ const StatusMessages = ({ messages }: StatusMessagesProps) => {
 
   const sortMessages = (msgs: StatusMessage[]): StatusMessage[] => {
     const sorted = [...msgs];
-    
+
     switch (sort) {
       case "priority-desc":
-        return sorted.sort((a, b) => getPriorityOrder(a.priority) - getPriorityOrder(b.priority));
+        return sorted.sort(
+          (a, b) => getPriorityOrder(a.priority) - getPriorityOrder(b.priority)
+        );
       case "priority-asc":
-        return sorted.sort((a, b) => getPriorityOrder(b.priority) - getPriorityOrder(a.priority));
+        return sorted.sort(
+          (a, b) => getPriorityOrder(b.priority) - getPriorityOrder(a.priority)
+        );
       case "alphabetical-asc":
         return sorted.sort((a, b) => a.title.localeCompare(b.title));
       case "alphabetical-desc":
         return sorted.sort((a, b) => b.title.localeCompare(a.title));
       case "type-asc":
-        return sorted.sort((a, b) => getTypeLabel(a.type).localeCompare(getTypeLabel(b.type)));
+        return sorted.sort((a, b) =>
+          getTypeLabel(a.type).localeCompare(getTypeLabel(b.type))
+        );
       default:
         return sorted;
     }
   };
 
-  const filteredMessages =
-    filter === "all"
-      ? messages
-      : messages.filter((msg) => msg.priority === filter);
-  
+  // Filtrera först efter prioritet, sedan efter status
+  let filteredMessages = messages;
+
+  if (priorityFilter !== "all") {
+    filteredMessages = filteredMessages.filter(
+      (msg) => msg.priority === priorityFilter
+    );
+  }
+
+  if (statusFilter !== "all") {
+    filteredMessages = filteredMessages.filter(
+      (msg) => msg.status === statusFilter
+    );
+  }
+
   const sortedAndFilteredMessages = sortMessages(filteredMessages);
 
   return (
     <div className="statusMsg-container">
-      <div className="header-controls">
-        <h1 className="status-heading">Status Messages</h1>
-        
-        <div className="sort-controls">
-          <label htmlFor="sort-select" className="sort-label">Sort by:</label>
+      <h1 className="status-heading">Status Messages</h1>
+
+      {/* Filter and Sort Controls - All Dropdowns */}
+      <div
+        className="sort-controls"
+        style={{
+          display: "flex",
+          gap: "20px",
+          marginBottom: "20px",
+          flexWrap: "wrap",
+        }}
+      >
+        {/* Priority Filter Dropdown */}
+        <div>
+          <label htmlFor="priority-filter" className="sort-label">
+            Filter by Priority:
+          </label>
+          <select
+            id="priority-filter"
+            value={priorityFilter}
+            onChange={(e) =>
+              setPriorityFilter(e.target.value as PriorityFilterType)
+            }
+            className="sort-select"
+          >
+            <option value="all">All Priorities ({messages.length})</option>
+            <option value="critical">
+              Critical (
+              {messages.filter((m) => m.priority === "critical").length})
+            </option>
+            <option value="high">
+              High ({messages.filter((m) => m.priority === "high").length})
+            </option>
+            <option value="medium">
+              Medium ({messages.filter((m) => m.priority === "medium").length})
+            </option>
+            <option value="low">
+              Low ({messages.filter((m) => m.priority === "low").length})
+            </option>
+          </select>
+        </div>
+
+        {/* Status Filter Dropdown */}
+        <div>
+          <label htmlFor="status-filter" className="sort-label">
+            Filter by Status:
+          </label>
+          <select
+            id="status-filter"
+            value={statusFilter}
+            onChange={(e) =>
+              setStatusFilter(e.target.value as StatusFilterType)
+            }
+            className="sort-select"
+          >
+            <option value="all">All Statuses ({messages.length})</option>
+            <option value="open">
+              Open ({messages.filter((m) => m.status === "open").length})
+            </option>
+            <option value="investigating">
+              Investigating (
+              {messages.filter((m) => m.status === "investigating").length})
+            </option>
+            <option value="resolved">
+              Resolved ({messages.filter((m) => m.status === "resolved").length}
+              )
+            </option>
+            <option value="closed">
+              Closed ({messages.filter((m) => m.status === "closed").length})
+            </option>
+          </select>
+        </div>
+
+        {/* Sort Dropdown */}
+        <div>
+          <label htmlFor="sort-select" className="sort-label">
+            Sort by:
+          </label>
           <select
             id="sort-select"
             value={sort}
@@ -183,43 +290,6 @@ const StatusMessages = ({ messages }: StatusMessagesProps) => {
             <option value="type-asc">Type: A-Z</option>
           </select>
         </div>
-      </div>
-
-      <div className="filter-menu">
-        <button
-          onClick={() => setFilter("all")}
-          className={`filter-button ${filter === "all" ? "active" : ""}`}
-        >
-          All ({messages.length})
-        </button>
-
-        <button
-          onClick={() => setFilter("critical")}
-          className={`filter-button ${filter === "critical" ? "active critical" : ""}`}
-        >
-          Critical ({messages.filter((m) => m.priority === "critical").length})
-        </button>
-
-        <button
-          onClick={() => setFilter("high")}
-          className={`filter-button ${filter === "high" ? "active danger" : ""}`}
-        >
-          High ({messages.filter((m) => m.priority === "high").length})
-        </button>
-
-        <button
-          onClick={() => setFilter("medium")}
-          className={`filter-button ${filter === "medium" ? "active warning" : ""}`}
-        >
-          Medium ({messages.filter((m) => m.priority === "medium").length})
-        </button>
-
-        <button
-          onClick={() => setFilter("low")}
-          className={`filter-button ${filter === "low" ? "active ok" : ""}`}
-        >
-          Low ({messages.filter((m) => m.priority === "low").length})
-        </button>
       </div>
 
       {sortedAndFilteredMessages.length === 0 ? (
@@ -238,42 +308,93 @@ const StatusMessages = ({ messages }: StatusMessagesProps) => {
               <div className="message-header">
                 <div>
                   <h2 className="message-title">{msg.title}</h2>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
-                    <span className="message-type">{getTypeLabel(msg.type)}</span>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "8px",
+                      flexWrap: "wrap",
+                      marginTop: "4px",
+                    }}
+                  >
+                    <span className="message-type">
+                      {getTypeLabel(msg.type)}
+                    </span>
                     {msg.aiStatus && (
                       <span className={`ai-status-badge ${msg.aiStatus}`}>
-                        <svg xmlns="http://www.w3.org/2000/svg" height="14px" viewBox="0 -960 960 960" width="14px" fill="currentColor">
-                          <path d="m440-120-40-120-120-40 120-40 40-120 40 120 120 40-120 40-40 120Zm300-200-30-90-90-30 90-30 30-90 30 90 90 30-90 30-30 90ZM240-580l-30-90-90-30 90-30 30-90 30 90 90 30-90 30-30 90Zm520 0-30-90-90-30 90-30 30-90 30 90 90 30-90 30-30 90ZM440-40l40-120 120-40-120-40-40-120-40 120-120 40 120 40 40 120Zm300-200 30-90 90-30-90-30-30-90-30 90-90 30 90 30 30 90Z"/>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          height="14px"
+                          viewBox="0 -960 960 960"
+                          width="14px"
+                          fill="currentColor"
+                        >
+                          <path d="m440-120-40-120-120-40 120-40 40-120 40 120 120 40-120 40-40 120Zm300-200-30-90-90-30 90-30 30-90 30 90 90 30-90 30-30 90ZM240-580l-30-90-90-30 90-30 30-90 30 90 90 30-90 30-30 90Zm520 0-30-90-90-30 90-30 30-90 30 90 90 30-90 30-30 90ZM440-40l40-120 120-40-120-40-40-120-40 120-120 40 120 40 40 120Zm300-200 30-90 90-30-90-30-30-90-30 90-90 30 90 30 30 90Z" />
                         </svg>
                         {getAIStatusLabel(msg.aiStatus)}
                       </span>
                     )}
-                    <span className={`report-status-badge ${getReportStatusColor(msg.status)}`}>
-                      {msg.status === 'resolved' || msg.status === 'closed' ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" height="14px" viewBox="0 -960 960 960" width="14px" fill="currentColor">
-                          <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z"/>
+                    <span
+                      className={`report-status-badge ${getReportStatusColor(
+                        msg.status
+                      )}`}
+                    >
+                      {msg.status === "resolved" || msg.status === "closed" ? (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          height="14px"
+                          viewBox="0 -960 960 960"
+                          width="14px"
+                          fill="currentColor"
+                        >
+                          <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
                         </svg>
-                      ) : msg.status === 'investigating' ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" height="14px" viewBox="0 -960 960 960" width="14px" fill="currentColor">
-                          <path d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/>
+                      ) : msg.status === "investigating" ? (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          height="14px"
+                          viewBox="0 -960 960 960"
+                          width="14px"
+                          fill="currentColor"
+                        >
+                          <path d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
                         </svg>
                       ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" height="14px" viewBox="0 -960 960 960" width="14px" fill="currentColor">
-                          <path d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          height="14px"
+                          viewBox="0 -960 960 960"
+                          width="14px"
+                          fill="currentColor"
+                        >
+                          <path d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
                         </svg>
                       )}
                       {getReportStatusLabel(msg.status)}
                     </span>
                   </div>
                 </div>
-                <span className={`status-badge ${getPriorityColor(msg.priority)}`}>
-                  {(msg.priority === "critical" || msg.priority === "high") ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="#FFFFFF">
-                      <path d="m40-120 440-760 440 760H40Zm138-80h604L480-720 178-200Zm302-40q17 0 28.5-11.5T520-280q0-17-11.5-28.5T480-320q-17 0-28.5 11.5T440-280q0 17 11.5 28.5T480-240Zm-40-120h80v-200h-80v200Zm40-100Z"/>
+                <span
+                  className={`status-badge ${getPriorityColor(msg.priority)}`}
+                >
+                  {msg.priority === "critical" || msg.priority === "high" ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      height="18px"
+                      viewBox="0 -960 960 960"
+                      width="18px"
+                      fill="#FFFFFF"
+                    >
+                      <path d="m40-120 440-760 440 760H40Zm138-80h604L480-720 178-200Zm302-40q17 0 28.5-11.5T520-280q0-17-11.5-28.5T480-320q-17 0-28.5 11.5T440-280q0 17 11.5 28.5T480-240Zm-40-120h80v-200h-80v200Zm40-100Z" />
                     </svg>
                   ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="#FFFFFF">
-                      <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z"/>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      height="18px"
+                      viewBox="0 -960 960 960"
+                      width="18px"
+                      fill="#FFFFFF"
+                    >
+                      <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
                     </svg>
                   )}
                   {getPriorityLabel(msg.priority)}
@@ -286,14 +407,14 @@ const StatusMessages = ({ messages }: StatusMessagesProps) => {
                 {msg.assignedTo && !msg.aiStatus && (
                   <div className="detail-row assigned-user">
                     <strong>Assigned to:</strong>
-                    <span className="user-badge">
-                      {msg.assignedTo}
-                    </span>
+                    <span className="user-badge">{msg.assignedTo}</span>
                   </div>
                 )}
                 <div className="detail-row">
                   <strong>Action:</strong> {getActionLabel(msg.action)}
-                  {msg.target && <span className="target"> → {msg.target}</span>}
+                  {msg.target && (
+                    <span className="target"> → {msg.target}</span>
+                  )}
                 </div>
                 {msg.recommendation && (
                   <div className="detail-row recommendation">
