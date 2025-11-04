@@ -128,7 +128,10 @@ export default function ErrorTester({ onIncidentCreated }: Props): JSX.Element {
                         </div>
 
                         <div style={{ display: 'flex', gap: 8, marginTop: 12, justifyContent: 'flex-end', alignItems: 'center' }}>
-                            <button onClick={sendToIncidents} disabled={sending || loading || !currentText()}>
+                            <button onClick={async () => {
+                                await sendToIncidents();
+                                window.location.href = "/"
+                            }} disabled={sending || loading || !currentText()}>
                                 {sending ? 'Sending…' : 'Send'}
                             </button>
                             {sendSuccess && <span style={{ color: 'green' }}>{sendSuccess}</span>}
