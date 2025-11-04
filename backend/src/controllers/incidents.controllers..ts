@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { incidentArray } from "../models/incidentModel";
 import analyzeIncident, { normalizeRawData }  from "../services/aiAnalysis";
 import { IncidentSchema } from "../types/zod";
+import { Incident } from "../models/incident.model";
 
 const copiedIncidentArray = [...incidentArray];
 
@@ -27,8 +28,10 @@ export class IncidentController {
         return res.status(500).json({ message: "AI output format error" });
     }
       copiedIncidentArray.push(parsedIncident.data);
+      
 
-      attemptFix(parsedIncident.data);
+      //attemptFix(parsedIncident.data);
+      await Incident.create(parsedIncident.data);
 
       return res.status(201).json({ data: parsedIncident.data });
     } catch (error) {
