@@ -9,6 +9,7 @@ const aiAnalysisSchema = new mongoose.Schema({
     target: { type: String, default: null },
     priority: { type: String },
     recommendation: { type: String },
+    assignedTo: { type: String },
 }, { _id: false });
 
 const incidentSchema = new mongoose.Schema({
