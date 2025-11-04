@@ -84,15 +84,17 @@ export async function analyzeIncident(
   const prompt = `Du är en AI som analyserar IT-incidenter.
 Läs texten nedan och klassificera incidenten enligt följande regler:
 
-- Om det handlar om "down", "crashed" → type: "server_down", priority: "critical"
-- Om det handlar om "cpu", "slow" → type: "high_cpu", priority: "high"
-- Om det handlar om "memory", "leak" → type: "memory_leak", priority: "high"
-- Annars → type: "unknown", priority: "medium"
+- Om det handlar om "down", "crashed" → type: "server_down", priority: "critical", action: "restart_service"
+- Om det handlar om "cpu", "slow" → type: "high_cpu", priority: "high", action: "scale_up"
+- Om det handlar om "memory", "leak" → type: "memory_leak", priority: "high", action: "clear_cache"
+- Annars → type: "unknown", priority: "medium", action: "notify_human"
 
 Svara ENDAST med ett JSON-objekt i detta format (ingen annan text):
 {
   "type": "server_down" | "high_cpu" | "memory_leak" | "unknown",
   "priority": "critical" | "high" | "medium" | "low",
+  "action": "restart_service" | "scale_up" | "clear_cache" | "notify_human" | "none",
+  "target": "Namnet på den drabbade tjänsten/servern eller null",
   "recommendation": "En kort svensk mening om vad som bör göras"
 }
 
@@ -125,6 +127,8 @@ Beskrivning: ${incident.description}`;
     return {
       type: "unknown",
       priority: "medium",
+      action: "notify_human",
+      target: null,
       recommendation:
         "Kunde inte analysera incidenten. Manuell granskning krävs.",
     };
