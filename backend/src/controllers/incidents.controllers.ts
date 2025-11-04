@@ -4,6 +4,7 @@ import analyzeIncident, {
   notifyAssignedPerson,
 } from "../services/aiAnalysis";
 import { Incident } from "../models/incident.model";
+import { attemptFix } from "../services/autoFix";
 
 export class IncidentController {
   async getAllIncidents(req: Request, res: Response) {
@@ -23,7 +24,7 @@ export class IncidentController {
       const normalizedIncident = await normalizeRawData(description);
       let aiAnalysis = await analyzeIncident(normalizedIncident);
 
-      //attemptFix(parsedIncident.data);
+      attemptFix(aiAnalysis);
       await Incident.create({ ...normalizedIncident, aiAnalysis: aiAnalysis });
 
       // Skicka Slack-notifikation till tilldelad person
