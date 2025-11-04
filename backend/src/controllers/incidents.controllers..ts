@@ -1,19 +1,19 @@
 import { Request, Response } from "express";
 import { incidentArray } from "../models/incidentModel";
-import analyzeIncident, { normalizeRawData }  from "../services/aiAnalysis";
+import analyzeIncident, { normalizeRawData } from "../services/aiAnalysis";
 import { IncidentSchema } from "../types/zod";
 import { Incident } from "../models/incident.model";
 
-const copiedIncidentArray = [...incidentArray];
-
 export class IncidentController {
-  getAllIncidents(req: Request, res: Response) {
+  async getAllIncidents(req: Request, res: Response) {
     try {
-      if (incidentArray.length === 0)
+      const incidents = await Incident.find({});
+      console.log(incidents);
+      if (incidents.length === 0)
         return res.status(404).json({ message: "no incidents" });
       return res.status(200).json({ data: incidentArray });
     } catch (error) {
-      res.status(500).json({ message: "DB error" });
+      return res.status(500).json({ message: "DB error" });
     }
   }
 
@@ -21,31 +21,33 @@ export class IncidentController {
     const { description } = req.body;
     try {
       const normalizedIncident = await normalizeRawData(description);
-      const aiAnalysis = await analyzeIncident(normalizedIncident);
-      let parsedIncident = IncidentSchema.safeParse(aiAnalysis);
-      if (!parsedIncident.success) {
-        //TODO: Handle if AI outputs incorrect format
-        return res.status(500).json({ message: "AI output format error" });
-    }
-      copiedIncidentArray.push(parsedIncident.data);
-      
+      let aiAnalysis = await analyzeIncident(normalizedIncident);
+    //  let parsedIncident = IncidentSchema.safeParse(aiAnalysis);
+    //   while (!parsedIncident.success) {
+    //     parsedIncident = IncidentSchema.safeParse(
+    //       await analyzeIncident(normalizedIncident)
+    //     );
+    //   }
 
       //attemptFix(parsedIncident.data);
-      await Incident.create(parsedIncident.data);
+      console.log({...normalizedIncident, aiAnalysis: aiAnalysis})
+      await Incident.create({...normalizedIncident, aiAnalysis: aiAnalysis});
 
-      return res.status(201).json({ data: parsedIncident.data });
+      return res.status(201).json({ data: aiAnalysis });
     } catch (error) {
+        console.log(error)
       return res.status(500).json({ message: "AI analysis failed" });
     }
   }
-
 
   async updateIncidentStatusHandler(req: Request, res: Response) {
     const { id } = req.params;
     const { status } = req.body;
 
     try {
-      const incident = copiedIncidentArray.find((inc) => inc.id === id);
+              const incidents = await Incident.find({});
+
+      const incident = incidents.find((inc) => inc.id === id);
       if (!incident) {
         return res.status(404).json({ message: "Incident not found" });
       }
