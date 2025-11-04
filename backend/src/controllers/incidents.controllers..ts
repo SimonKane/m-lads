@@ -25,7 +25,7 @@ export class IncidentController {
         //TODO: Handle if AI outputs incorrect format
         return res.status(500).json({ message: "AI output format error" });
     }
-      copiedIncidentArray.push(parsedIncident);
+      copiedIncidentArray.push(parsedIncident.data);
 
       attemptFix(newIncident);
 
