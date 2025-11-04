@@ -142,7 +142,7 @@ Beskrivning: ${incident.description}`;
       priority: "medium",
       action: "notify_human",
       target: null,
-      assignedTo: "Anna",
+      assignedTo: "AI Assistant",
       recommendation:
         "Kunde inte analysera incidenten. Manuell granskning krävs.",
     };
