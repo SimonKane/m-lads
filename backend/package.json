@@ -2,17 +2,19 @@
   "name": "incident-backend",
   "version": "1.0.0",
   "description": "Backend för AI-driven incidenthantering",
-  "main": "dist/index.js",
+  "main": "dist/server.js",
   "scripts": {
     "dev": "nodemon --watch src --ext ts --exec ts-node src/server.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/server.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "openai": "^6.7.0"
+    "mongoose": "^8.19.2",
+    "openai": "^6.7.0",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@types/cors": "^2.8.13",
