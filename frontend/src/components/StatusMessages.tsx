@@ -6,7 +6,6 @@ import { useState } from "react";
 import {
   StatusMessage,
   StatusPriority,
-  AIStatus,
   ReportStatus,
 } from "../types/StatusMessage";
 import "./statusMessages.css";
@@ -96,17 +95,6 @@ const StatusMessages = ({ messages }: StatusMessagesProps) => {
         return "No Action";
       default:
         return action;
-    }
-  };
-
-  const getAIStatusLabel = (aiStatus: AIStatus) => {
-    switch (aiStatus) {
-      case "assigned":
-        return "AI Assigned";
-      case "resolved":
-        return "AI Resolved";
-      default:
-        return null;
     }
   };
 
@@ -319,20 +307,6 @@ const StatusMessages = ({ messages }: StatusMessagesProps) => {
                     <span className="message-type">
                       {getTypeLabel(msg.type)}
                     </span>
-                    {msg.aiStatus && (
-                      <span className={`ai-status-badge ${msg.aiStatus}`}>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          height="14px"
-                          viewBox="0 -960 960 960"
-                          width="14px"
-                          fill="currentColor"
-                        >
-                          <path d="m440-120-40-120-120-40 120-40 40-120 40 120 120 40-120 40-40 120Zm300-200-30-90-90-30 90-30 30-90 30 90 90 30-90 30-30 90ZM240-580l-30-90-90-30 90-30 30-90 30 90 90 30-90 30-30 90Zm520 0-30-90-90-30 90-30 30-90 30 90 90 30-90 30-30 90ZM440-40l40-120 120-40-120-40-40-120-40 120-120 40 120 40 40 120Zm300-200 30-90 90-30-90-30-30-90-30 90-90 30 90 30 30 90Z" />
-                        </svg>
-                        {getAIStatusLabel(msg.aiStatus)}
-                      </span>
-                    )}
                     <span
                       className={`report-status-badge ${getReportStatusColor(
                         msg.status
@@ -404,10 +378,24 @@ const StatusMessages = ({ messages }: StatusMessagesProps) => {
               <p className="message-content">{msg.description}</p>
 
               <div className="message-details">
-                {msg.assignedTo && !msg.aiStatus && (
+                {msg.assignedTo && (
                   <div className="detail-row assigned-user">
                     <strong>Assigned to:</strong>
-                    <span className="user-badge">{msg.assignedTo}</span>
+                    <span className={`user-badge ${msg.aiStatus ? 'ai-assigned' : ''}`}>
+                      {msg.aiStatus && (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          height="14px"
+                          viewBox="0 -960 960 960"
+                          width="14px"
+                          fill="currentColor"
+                          style={{ marginRight: '4px' }}
+                        >
+                          <path d="m440-120-40-120-120-40 120-40 40-120 40 120 120 40-120 40-40 120Zm300-200-30-90-90-30 90-30 30-90 30 90 90 30-90 30-30 90ZM240-580l-30-90-90-30 90-30 30-90 30 90 90 30-90 30-30 90Zm520 0-30-90-90-30 90-30 30-90 30 90 90 30-90 30-30 90ZM440-40l40-120 120-40-120-40-40-120-40 120-120 40 120 40 40 120Zm300-200 30-90 90-30-90-30-30-90-30 90-90 30 90 30 30 90Z" />
+                        </svg>
+                      )}
+                      {msg.assignedTo}
+                    </span>
                   </div>
                 )}
                 <div className="detail-row">

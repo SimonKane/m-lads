@@ -476,6 +476,24 @@ body.dark-mode .user-badge svg {
   color: #64b5f6;
 }
 
+.user-badge.ai-assigned {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+body.dark-mode .user-badge.ai-assigned {
+  background-color: #4a1a5a;
+  color: #ba68c8;
+}
+
+.user-badge.ai-assigned svg {
+  color: #7b1fa2;
+}
+
+body.dark-mode .user-badge.ai-assigned svg {
+  color: #ba68c8;
+}
+
 .user-specialization {
   font-size: 11px;
   opacity: 0.8;
