@@ -1,4 +1,8 @@
-import { normalizeRawData, analyzeIncident } from "./aiAnalysis";
+import {
+  normalizeRawData,
+  analyzeIncident,
+  notifyAssignedPerson,
+} from "./aiAnalysis";
 
 // Testscenarier med olika datastrukturer från olika företag
 if (require.main === module) {
@@ -43,7 +47,11 @@ if (require.main === module) {
     const analysis1 = await analyzeIncident(incident1);
     console.log(`👤 Assigned to: ${analysis1.assignedTo}`);
     console.log(`🎯 Action: ${analysis1.action}`);
-    console.log(`💡 ${analysis1.recommendation}\n`);
+    console.log(`💡 ${analysis1.recommendation}`);
+
+    // Skicka Slack-notifikation
+    await notifyAssignedPerson(incident1, analysis1);
+    console.log();
 
     console.log("=".repeat(60) + "\n");
 
