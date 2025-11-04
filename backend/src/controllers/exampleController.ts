@@ -11,3 +11,5 @@ export class ExampleController {
         res.send('Create example');
     }
 }
+
+export default ExampleController;
