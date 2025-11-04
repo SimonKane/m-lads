@@ -32,6 +32,11 @@ export const itStaff: ITStaff[] = [
   { id: "1", name: "Anna", specialization: "Database & Backend" },
   { id: "2", name: "Johan", specialization: "API & Performance" },
   { id: "3", name: "Lisa", specialization: "Cache & Infrastructure" },
+  {
+    id: "4",
+    name: "AI Assistant",
+    specialization: "General troubleshooting & unknown issues",
+  },
 ];
 
 // In-Memory Storage - Incidents
