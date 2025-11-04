@@ -35,16 +35,20 @@ export class IncidentController {
     const { status } = req.body;
 
     try {
-        const incidents = await Incident.find({});
+      const incident = await Incident.findByIdAndUpdate(
+        id,
+        { status },
+        { new: true, runValidators: true }
+      );
 
-      const incident = incidents.find((inc) => inc.id === id);
       if (!incident) {
         return res.status(404).json({ message: "Incident not found" });
       }
-      incident.status = status;
-      res.status(200).json({ incident });
+
+      return res.status(200).json({ incident });
     } catch (error) {
-      res.status(500).json({ error: "Internal server error" });
+      console.error("Update incident error:", error);
+      return res.status(500).json({ error: "Internal server error" });
     }
   }
 }
