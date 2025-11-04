@@ -10,7 +10,7 @@ export class IncidentController {
         return res.status(404).json({ message: "no incidents" });
       return res.status(200).json({ data: incidents });
     } catch (error) {
-      return res.status(500).json({ message: "DB error" });
+      return res.status(500).json({ error });
     }
   }
 
@@ -21,12 +21,12 @@ export class IncidentController {
       let aiAnalysis = await analyzeIncident(normalizedIncident);
 
       //attemptFix(parsedIncident.data);
-      await Incident.create({...normalizedIncident, aiAnalysis: aiAnalysis});
+      await Incident.create({...normalizedIncident, aiAnalysis });
 
       return res.status(201).json({ data: aiAnalysis });
     } catch (error) {
         console.log(error)
-      return res.status(500).json({ message: "AI analysis failed" });
+      return res.status(500).json({ error });
     }
   }
 
@@ -48,7 +48,7 @@ export class IncidentController {
       return res.status(200).json({ incident });
     } catch (error) {
       console.error("Update incident error:", error);
-      return res.status(500).json({ error: "Internal server error" });
+      return res.status(500).json({ error });
     }
   }
     
