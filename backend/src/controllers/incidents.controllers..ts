@@ -1,17 +1,14 @@
 import { Request, Response } from "express";
-import { incidentArray } from "../models/incidentModel";
 import analyzeIncident, { normalizeRawData } from "../services/aiAnalysis";
-import { IncidentSchema } from "../types/zod";
 import { Incident } from "../models/incident.model";
 
 export class IncidentController {
   async getAllIncidents(req: Request, res: Response) {
     try {
       const incidents = await Incident.find({});
-      console.log(incidents);
       if (incidents.length === 0)
         return res.status(404).json({ message: "no incidents" });
-      return res.status(200).json({ data: incidentArray });
+      return res.status(200).json({ data: incidents });
     } catch (error) {
       return res.status(500).json({ message: "DB error" });
     }
@@ -22,15 +19,8 @@ export class IncidentController {
     try {
       const normalizedIncident = await normalizeRawData(description);
       let aiAnalysis = await analyzeIncident(normalizedIncident);
-    //  let parsedIncident = IncidentSchema.safeParse(aiAnalysis);
-    //   while (!parsedIncident.success) {
-    //     parsedIncident = IncidentSchema.safeParse(
-    //       await analyzeIncident(normalizedIncident)
-    //     );
-    //   }
 
       //attemptFix(parsedIncident.data);
-      console.log({...normalizedIncident, aiAnalysis: aiAnalysis})
       await Incident.create({...normalizedIncident, aiAnalysis: aiAnalysis});
 
       return res.status(201).json({ data: aiAnalysis });
@@ -45,7 +35,7 @@ export class IncidentController {
     const { status } = req.body;
 
     try {
-              const incidents = await Incident.find({});
+        const incidents = await Incident.find({});
 
       const incident = incidents.find((inc) => inc.id === id);
       if (!incident) {
