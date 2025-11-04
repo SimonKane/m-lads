@@ -1,8 +1,9 @@
 import "dotenv/config";
 import OpenAI from "openai";
-import { Incident } from "../models/incidentModel";
+import { Incident, itStaff } from "../models/incidentModel";
 
 type AnalysisResult = NonNullable<Incident["aiAnalysis"]>;
+type AssignmentResult = AnalysisResult & { assignedTo: string };
 
 console.log("API Key loaded:", process.env.API_KEY ? "✓ Yes" : "✗ No");
 
@@ -80,8 +81,17 @@ ${JSON.stringify(rawData, null, 2)}`;
 
 export async function analyzeIncident(
   incident: Incident
-): Promise<AnalysisResult> {
-  const prompt = `Du är en AI som analyserar IT-incidenter.
+): Promise<AssignmentResult> {
+  // Skapa en lista av tillgänglig personal
+  const staffList = itStaff
+    .map((person) => `- ${person.name} (${person.specialization})`)
+    .join("\n");
+
+  const prompt = `Du är en AI som analyserar IT-incidenter och tilldelar dem till rätt IT-personal.
+
+Tillgänglig personal:
+${staffList}
+
 Läs texten nedan och klassificera incidenten enligt följande regler:
 
 - Om det handlar om "down", "crashed" → type: "server_down", priority: "critical", action: "restart_service"
@@ -89,12 +99,15 @@ Läs texten nedan och klassificera incidenten enligt följande regler:
 - Om det handlar om "memory", "leak" → type: "memory_leak", priority: "high", action: "clear_cache"
 - Annars → type: "unknown", priority: "medium", action: "notify_human"
 
+Tilldela incidenten till den person vars specialisering passar bäst.
+
 Svara ENDAST med ett JSON-objekt i detta format (ingen annan text):
 {
   "type": "server_down" | "high_cpu" | "memory_leak" | "unknown",
   "priority": "critical" | "high" | "medium" | "low",
   "action": "restart_service" | "scale_up" | "clear_cache" | "notify_human" | "none",
   "target": "Namnet på den drabbade tjänsten/servern eller null",
+  "assignedTo": "Namnet på den person som ska hantera incidenten (Anna, Johan eller Lisa)",
   "recommendation": "En kort svensk mening om vad som bör göras"
 }
 
@@ -119,7 +132,7 @@ Beskrivning: ${incident.description}`;
       throw new Error("Ingen respons från AI");
     }
 
-    const result = JSON.parse(responseText) as AnalysisResult;
+    const result = JSON.parse(responseText) as AssignmentResult;
     return result;
   } catch (error) {
     console.error("Fel vid AI-analys:", error);
@@ -129,60 +142,11 @@ Beskrivning: ${incident.description}`;
       priority: "medium",
       action: "notify_human",
       target: null,
+      assignedTo: "AI Assistant",
       recommendation:
         "Kunde inte analysera incidenten. Manuell granskning krävs.",
     };
   }
-}
-
-// Test funktionen (ta bort denna sektion när du är klar med testningen)
-if (require.main === module) {
-  console.log("🧪 Testar hela flödet: Normalisering + Analys...\n");
-
-  (async () => {
-    // Exempel på rådata från monitoring-system
-    const rawData = {
-      timestamp: "2024-11-04T14:23:45.123Z",
-      source: "cloudwatch",
-      severity: "ERROR",
-      service: "payment-api",
-      instance: "i-0abc123def456",
-      region: "eu-north-1",
-      metric: {
-        name: "CPUUtilization",
-        value: 98.5,
-        threshold: 80,
-      },
-      logs: [
-        "ERROR: OutOfMemoryException in PaymentProcessor.java:142",
-        "ERROR: Connection pool exhausted - 0/50 available",
-        "WARN: Response time degraded: 5.2s (normal: 0.3s)",
-      ],
-      tags: {
-        environment: "production",
-        team: "payments",
-        priority: "high",
-      },
-    };
-
-    console.log("📥 Steg 1: Normalisera rådata...\n");
-    const incident = await normalizeRawData(rawData);
-
-    console.log("✅ Normaliserad incident:");
-    console.log(`  ID: ${incident.id}`);
-    console.log(`  Titel: ${incident.title}`);
-    console.log(`  Beskrivning: ${incident.description}`);
-    console.log(`  Status: ${incident.status}`);
-    console.log(`  Prioritet: ${incident.priority}\n`);
-
-    console.log("🔍 Steg 2: Analysera incident...\n");
-    const analysis = await analyzeIncident(incident);
-
-    console.log("✅ Analysresultat:");
-    console.log(`  Type: ${analysis.type}`);
-    console.log(`  Priority: ${analysis.priority}`);
-    console.log(`  Recommendation: ${analysis.recommendation}\n`);
-  })();
 }
 
 // Default export för bakåtkompatibilitet
