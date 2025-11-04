@@ -115,7 +115,7 @@ body.dark-mode .fallback-warning {
 }
 
 .status-heading {
-  margin: 0;
+  margin: 0 0 32px 0;
   color: var(--text-primary);
 }
 
@@ -126,9 +126,12 @@ body.dark-mode .fallback-warning {
 }
 
 .sort-label {
-  color: var(--text-secondary);
-  font-size: 14px;
-  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0;
 }
 
 .sort-select {

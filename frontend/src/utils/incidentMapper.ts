@@ -64,6 +64,7 @@ export function convertIncidentToStatusMessage(incident: Incident): StatusMessag
     assignedTo: assignedTo,
     aiStatus: aiStatus,
     status: incident.status,
+    createdAt: incident.createdAt,
   };
 }
 

@@ -26,7 +26,9 @@ type SortType =
   | "priority-asc"
   | "alphabetical-asc"
   | "alphabetical-desc"
-  | "type-asc";
+  | "type-asc"
+  | "time-desc"
+  | "time-asc";
 
 const StatusMessages = ({ messages }: StatusMessagesProps) => {
   const [priorityFilter, setPriorityFilter] =
@@ -131,6 +133,36 @@ const StatusMessages = ({ messages }: StatusMessagesProps) => {
     }
   };
 
+  const formatTimestamp = (dateString: string): string => {
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffMs = now.getTime() - date.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+
+      if (diffMins < 1) {
+        return "Just now";
+      } else if (diffMins < 60) {
+        return `${diffMins}m ago`;
+      } else if (diffHours < 24) {
+        return `${diffHours}h ago`;
+      } else if (diffDays < 7) {
+        return `${diffDays}d ago`;
+      } else {
+        // Format as date: "Jan 4, 2025"
+        return date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
+      }
+    } catch (error) {
+      return "Unknown";
+    }
+  };
+
   const getPriorityOrder = (priority: StatusPriority): number => {
     switch (priority) {
       case "critical":
@@ -166,10 +198,50 @@ const StatusMessages = ({ messages }: StatusMessagesProps) => {
         return sorted.sort((a, b) =>
           getTypeLabel(a.type).localeCompare(getTypeLabel(b.type))
         );
+      case "time-desc":
+        return sorted.sort((a, b) => {
+          const dateA = new Date(a.createdAt).getTime();
+          const dateB = new Date(b.createdAt).getTime();
+          return dateB - dateA; // Newest first
+        });
+      case "time-asc":
+        return sorted.sort((a, b) => {
+          const dateA = new Date(a.createdAt).getTime();
+          const dateB = new Date(b.createdAt).getTime();
+          return dateA - dateB; // Oldest first
+        });
       default:
         return sorted;
     }
   };
+
+  // Beräkna tillgängliga alternativ baserat på valda filter
+  // Om priority är vald, visa bara statusar som finns för den priorityn
+  let availableForStatusFilter = messages;
+  if (priorityFilter !== "all") {
+    availableForStatusFilter = messages.filter(
+      (msg) => msg.priority === priorityFilter
+    );
+  }
+
+  // Om status är vald, visa bara prioriteringar som finns för den statusen
+  let availableForPriorityFilter = messages;
+  if (statusFilter !== "all") {
+    availableForPriorityFilter = messages.filter(
+      (msg) => msg.status === statusFilter
+    );
+  }
+
+  // Hämta unika statusar från tillgängliga messages
+  const availableStatuses = Array.from(
+    new Set(availableForStatusFilter.map((msg) => msg.status))
+  );
+
+  // Hämta unika prioriteringar från tillgängliga messages
+  const availablePriorities = Array.from(
+    new Set(availableForPriorityFilter.map((msg) => msg.priority))
+  );
+
 
   // Filtrera först efter prioritet, sedan efter status
   let filteredMessages = messages;
@@ -197,76 +269,118 @@ const StatusMessages = ({ messages }: StatusMessagesProps) => {
         className="sort-controls"
         style={{
           display: "flex",
-          gap: "20px",
+          gap: "32px",
           marginBottom: "20px",
           flexWrap: "wrap",
         }}
       >
         {/* Priority Filter Dropdown */}
-        <div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           <label htmlFor="priority-filter" className="sort-label">
-            Filter by Priority:
+            Filter by Priority
           </label>
           <select
             id="priority-filter"
             value={priorityFilter}
-            onChange={(e) =>
-              setPriorityFilter(e.target.value as PriorityFilterType)
-            }
+            onChange={(e) => {
+              const newPriority = e.target.value as PriorityFilterType;
+              setPriorityFilter(newPriority);
+              // Om den valda statusen inte finns för den nya priorityn, återställ status
+              if (newPriority !== "all" && statusFilter !== "all") {
+                const filteredByPriority = messages.filter(
+                  (msg) => msg.priority === newPriority
+                );
+                const availableStatuses = Array.from(
+                  new Set(filteredByPriority.map((msg) => msg.status))
+                );
+                if (!availableStatuses.includes(statusFilter)) {
+                  setStatusFilter("all");
+                }
+              }
+            }}
             className="sort-select"
           >
             <option value="all">All Priorities ({messages.length})</option>
-            <option value="critical">
-              Critical (
-              {messages.filter((m) => m.priority === "critical").length})
-            </option>
-            <option value="high">
-              High ({messages.filter((m) => m.priority === "high").length})
-            </option>
-            <option value="medium">
-              Medium ({messages.filter((m) => m.priority === "medium").length})
-            </option>
-            <option value="low">
-              Low ({messages.filter((m) => m.priority === "low").length})
-            </option>
+            {availablePriorities.includes("critical") && (
+              <option value="critical">
+                Critical (
+                {availableForPriorityFilter.filter((m) => m.priority === "critical").length})
+              </option>
+            )}
+            {availablePriorities.includes("high") && (
+              <option value="high">
+                High ({availableForPriorityFilter.filter((m) => m.priority === "high").length})
+              </option>
+            )}
+            {availablePriorities.includes("medium") && (
+              <option value="medium">
+                Medium ({availableForPriorityFilter.filter((m) => m.priority === "medium").length})
+              </option>
+            )}
+            {availablePriorities.includes("low") && (
+              <option value="low">
+                Low ({availableForPriorityFilter.filter((m) => m.priority === "low").length})
+              </option>
+            )}
           </select>
         </div>
 
         {/* Status Filter Dropdown */}
-        <div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           <label htmlFor="status-filter" className="sort-label">
-            Filter by Status:
+            Filter by Status
           </label>
           <select
             id="status-filter"
             value={statusFilter}
-            onChange={(e) =>
-              setStatusFilter(e.target.value as StatusFilterType)
-            }
+            onChange={(e) => {
+              const newStatus = e.target.value as StatusFilterType;
+              setStatusFilter(newStatus);
+              // Om den valda priorityn inte finns för den nya statusen, återställ priority
+              if (newStatus !== "all" && priorityFilter !== "all") {
+                const filteredByStatus = messages.filter(
+                  (msg) => msg.status === newStatus
+                );
+                const availablePriorities = Array.from(
+                  new Set(filteredByStatus.map((msg) => msg.priority))
+                );
+                if (!availablePriorities.includes(priorityFilter)) {
+                  setPriorityFilter("all");
+                }
+              }
+            }}
             className="sort-select"
           >
             <option value="all">All Statuses ({messages.length})</option>
-            <option value="open">
-              Open ({messages.filter((m) => m.status === "open").length})
-            </option>
-            <option value="investigating">
-              Investigating (
-              {messages.filter((m) => m.status === "investigating").length})
-            </option>
-            <option value="resolved">
-              Resolved ({messages.filter((m) => m.status === "resolved").length}
-              )
-            </option>
-            <option value="closed">
-              Closed ({messages.filter((m) => m.status === "closed").length})
-            </option>
+            {availableStatuses.includes("open") && (
+              <option value="open">
+                Open ({availableForStatusFilter.filter((m) => m.status === "open").length})
+              </option>
+            )}
+            {availableStatuses.includes("investigating") && (
+              <option value="investigating">
+                Investigating (
+                {availableForStatusFilter.filter((m) => m.status === "investigating").length})
+              </option>
+            )}
+            {availableStatuses.includes("resolved") && (
+              <option value="resolved">
+                Resolved ({availableForStatusFilter.filter((m) => m.status === "resolved").length}
+                )
+              </option>
+            )}
+            {availableStatuses.includes("closed") && (
+              <option value="closed">
+                Closed ({availableForStatusFilter.filter((m) => m.status === "closed").length})
+              </option>
+            )}
           </select>
         </div>
 
         {/* Sort Dropdown */}
-        <div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           <label htmlFor="sort-select" className="sort-label">
-            Sort by:
+            Sort by
           </label>
           <select
             id="sort-select"
@@ -279,6 +393,8 @@ const StatusMessages = ({ messages }: StatusMessagesProps) => {
             <option value="alphabetical-asc">Alphabetical: A-Z</option>
             <option value="alphabetical-desc">Alphabetical: Z-A</option>
             <option value="type-asc">Type: A-Z</option>
+            <option value="time-desc">Time: Newest First</option>
+            <option value="time-asc">Time: Oldest First</option>
           </select>
         </div>
       </div>
@@ -300,7 +416,17 @@ const StatusMessages = ({ messages }: StatusMessagesProps) => {
             >
               <div className="message-header">
                 <div>
-                  <h2 className="message-title">{msg.title}</h2>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px" }}>
+                    <h2 className="message-title" style={{ flex: 1 }}>{msg.title}</h2>
+                    <span className="timestamp" style={{ 
+                      fontSize: "12px", 
+                      color: "var(--text-secondary)",
+                      whiteSpace: "nowrap",
+                      marginTop: "4px"
+                    }}>
+                      {formatTimestamp(msg.createdAt)}
+                    </span>
+                  </div>
                   <div
                     style={{
                       display: "flex",
@@ -491,9 +617,19 @@ const StatusMessages = ({ messages }: StatusMessagesProps) => {
               ×
             </button>
 
-            <div className="message-header">
+            <div className="message-header" style={{ paddingRight: "60px", paddingTop: "8px" }}>
               <div>
-                <h2 className="message-title">{selectedMessage.title}</h2>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px" }}>
+                  <h2 className="message-title" style={{ flex: 1 }}>{selectedMessage.title}</h2>
+                  <span className="timestamp" style={{ 
+                    fontSize: "12px", 
+                    color: "var(--text-secondary)",
+                    whiteSpace: "nowrap",
+                    marginTop: "4px"
+                  }}>
+                    {formatTimestamp(selectedMessage.createdAt)}
+                  </span>
+                </div>
                 <div
                   style={{
                     display: "flex",

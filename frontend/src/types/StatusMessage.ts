@@ -19,4 +19,5 @@ export interface StatusMessage {
   assignedTo: string | null; // From aiAnalysis.assignedTo
   aiStatus: AIStatus;
   status: ReportStatus;
+  createdAt: string; // ISO date string
 }
