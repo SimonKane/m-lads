@@ -167,43 +167,24 @@ export async function notifyAssignedPerson(
   );
 
   // Skapa ett formaterat meddelande
-  const priorityEmoji =
-    {
-      critical: "🚨",
-      high: "⚠️",
-      medium: "⚡",
-      low: "ℹ️",
-    }[analysis.priority] || "📋";
+  const message = `❗️ *Ny incident tilldelad: @${analysis.assignedTo}*
 
-  const actionEmoji =
-    {
-      restart_service: "🔄",
-      scale_up: "📈",
-      clear_cache: "🧹",
-      notify_human: "👤",
-      none: "✅",
-    }[analysis.action] || "🔧";
+*Incident:* ${incident.title}
+*ID:* ${incident.id}
+*Prioritet:* ${analysis.priority.toUpperCase()}
+*Typ:* ${analysis.type}
+*Mål:* ${analysis.target || "N/A"}
 
-  const message = `${priorityEmoji} *Ny incident tilldelad: ${
-    analysis.assignedTo
-  }*
-
-📌 *Incident:* ${incident.title}
-🆔 *ID:* ${incident.id}
-⚡ *Prioritet:* ${analysis.priority.toUpperCase()}
-🏷️ *Typ:* ${analysis.type}
-🎯 *Mål:* ${analysis.target || "N/A"}
-
-📝 *Beskrivning:*
+*Beskrivning:*
 ${incident.description}
 
-${actionEmoji} *Rekommenderad åtgärd:* ${analysis.action}
-💡 *Rekommendation:*
+*Rekommenderad åtgärd:* ${analysis.action}
+*Rekommendation:*
 ${analysis.recommendation}
 
-${assignedPerson ? `👤 *Specialisering:* ${assignedPerson.specialization}` : ""}
+${assignedPerson ? `*Specialisering:* ${assignedPerson.specialization}` : ""}
 
-⏰ *Skapad:* ${incident.createdAt.toISOString()}`;
+*Skapad:* ${incident.createdAt.toISOString()}`;
 
   try {
     const response = await fetch(webhookUrl, {
@@ -220,9 +201,9 @@ ${assignedPerson ? `👤 *Specialisering:* ${assignedPerson.specialization}` : "
       throw new Error(`Slack API error: ${response.statusText}`);
     }
 
-    console.log(`✅ Slack-notifikation skickad till ${analysis.assignedTo}!`);
+    console.log(`Slack-notifikation skickad till ${analysis.assignedTo}!`);
   } catch (error) {
-    console.error("❌ Misslyckades att skicka till Slack:", error);
+    console.error("Misslyckades att skicka till Slack:", error);
   }
 }
 
