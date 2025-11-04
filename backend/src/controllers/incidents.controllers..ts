@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import analyzeIncident, { normalizeRawData } from "../services/aiAnalysis";
 import { Incident } from "../models/incident.model";
+import { attemptFix } from "../services/autoFix";
 
 export class IncidentController {
   async getAllIncidents(req: Request, res: Response) {
@@ -20,12 +21,12 @@ export class IncidentController {
       const normalizedIncident = await normalizeRawData(description);
       let aiAnalysis = await analyzeIncident(normalizedIncident);
 
-      //attemptFix(parsedIncident.data);
-      await Incident.create({...normalizedIncident, aiAnalysis });
+      attemptFix(aiAnalysis);
+      await Incident.create({ ...normalizedIncident, aiAnalysis });
 
       return res.status(201).json({ data: aiAnalysis });
     } catch (error) {
-        console.log(error)
+      console.log(error);
       return res.status(500).json({ error });
     }
   }
@@ -51,7 +52,6 @@ export class IncidentController {
       return res.status(500).json({ error });
     }
   }
-    
 }
 
 export default IncidentController;
