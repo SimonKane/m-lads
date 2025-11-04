@@ -149,5 +149,82 @@ Beskrivning: ${incident.description}`;
   }
 }
 
+// Skicka notifikation till Slack när någon tilldelas en incident
+export async function notifyAssignedPerson(
+  incident: Incident,
+  analysis: AssignmentResult
+): Promise<void> {
+  const webhookUrl = process.env.SLACK_WEBHOOK_URL;
+
+  if (!webhookUrl) {
+    console.error("❌ SLACK_WEBHOOK_URL är inte konfigurerad i .env");
+    return;
+  }
+
+  // Hitta den tilldelade personen för att få mer information
+  const assignedPerson = itStaff.find(
+    (person) => person.name === analysis.assignedTo
+  );
+
+  // Skapa ett formaterat meddelande
+  const priorityEmoji =
+    {
+      critical: "🚨",
+      high: "⚠️",
+      medium: "⚡",
+      low: "ℹ️",
+    }[analysis.priority] || "📋";
+
+  const actionEmoji =
+    {
+      restart_service: "🔄",
+      scale_up: "📈",
+      clear_cache: "🧹",
+      notify_human: "👤",
+      none: "✅",
+    }[analysis.action] || "🔧";
+
+  const message = `${priorityEmoji} *Ny incident tilldelad: ${
+    analysis.assignedTo
+  }*
+
+📌 *Incident:* ${incident.title}
+🆔 *ID:* ${incident.id}
+⚡ *Prioritet:* ${analysis.priority.toUpperCase()}
+🏷️ *Typ:* ${analysis.type}
+🎯 *Mål:* ${analysis.target || "N/A"}
+
+📝 *Beskrivning:*
+${incident.description}
+
+${actionEmoji} *Rekommenderad åtgärd:* ${analysis.action}
+💡 *Rekommendation:*
+${analysis.recommendation}
+
+${assignedPerson ? `👤 *Specialisering:* ${assignedPerson.specialization}` : ""}
+
+⏰ *Skapad:* ${incident.createdAt.toISOString()}`;
+
+  try {
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        text: message,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Slack API error: ${response.statusText}`);
+    }
+
+    console.log(`✅ Slack-notifikation skickad till ${analysis.assignedTo}!`);
+  } catch (error) {
+    console.error("❌ Misslyckades att skicka till Slack:", error);
+  }
+}
+
 // Default export för bakåtkompatibilitet
 export default analyzeIncident;
