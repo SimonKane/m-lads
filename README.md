@@ -4,15 +4,50 @@ A full-stack TypeScript application for managing and automatically resolving sys
 
 ## 🚀 Overview
 
-M-LADS is an intelligent incident management system that combines AI-powered analysis with automated resolution strategies. The system analyzes incoming incidents, categorizes them, and executes appropriate automated actions (such as scaling resources, restarting services, or clearing caches) to resolve issues quickly and efficiently.
+M-LADS (Machine Learning Automated Detection System) is an **AI-Driven Incident Response & Self-Healing System** that transforms reactive alert handling into autonomous operations. This automated incident management platform features an AI-powered workflow engine that receives system alerts, classifies issues, triggers automated fixes when appropriate, and escalates to human operators only when necessary.
+
+### What It Does
+
+1. **Accepts Raw Incident Data** - Integrates with external monitoring systems (AWS, Azure, GCP, on-premises infrastructure)
+
+2. **AI-Powered Classification** - Uses artificial intelligence to extract:
+   - Issue type (server down, high CPU, memory leak, security anomaly, etc.)
+   - Severity and priority levels
+   - Recommended corrective actions
+
+3. **Automated Remediation** - Automatically performs corrective actions for critical events:
+   - Service restarts
+   - Resource scaling
+   - Cache clearing
+   - Infrastructure adjustments
+
+4. **Smart Escalation** - Assigns engineers for human-required incidents and sends notifications via Slack
+
+5. **Real-Time Dashboard** - Displays all incidents and actions in a minimal, intuitive interface
+
+### Why This Matters
+
+Modern operations generate large volumes of complex alerts. Most existing tools detect issues but still rely on humans to interpret logs, decide severity, assign personnel, and initiate remediation steps.
+
+**M-LADS transforms incident management by introducing:**
+
+- **AI-Based Understanding** - Intelligent incident interpretation and context extraction
+- **Automatic Prioritization** - Smart decision-making for action selection
+- **Self-Healing Automation** - Autonomous response execution for routine incidents
+- **Human-in-the-Loop** - Engineer assignment only when AI determines manual intervention is needed
+- **Reduced MTTR** - Dramatically lower mean-time-to-recovery through automation
+- **Scalable Operations** - Handle increasing alert volumes without proportional staffing increases
+- **Tool Agnostic** - Works alongside existing monitoring tools rather than replacing them
 
 ### Key Features
 
 - **AI-Powered Analysis**: Automatic incident classification and recommended actions
+- **Automated Resolution**: Integration with AWS Lambda for self-healing responses
 - **Real-time Monitoring**: Track incidents and their status in real-time
 - **Mock & Production Modes**: Test with mock Lambda functions, deploy to production when ready
 - **RESTful API**: Clean Express-based backend with TypeScript
 - **React Frontend**: Modern UI built with React, TypeScript, and Vite
+- **Notification System**: Slack webhook integration for team alerts
 
 ## 📁 Project Structure
 
@@ -100,7 +135,7 @@ USE_MOCK_LAMBDA=true
 # AWS Lambda Configuration (for production use)
 # Uncomment and configure when switching from mock to real AWS Lambda
 
-# AWS_REGION=us-east-1
+# AWS_REGION=aws_region
 # AWS_ACCESS_KEY_ID=your_aws_access_key
 # AWS_SECRET_ACCESS_KEY=your_aws_secret_key
 
@@ -201,6 +236,30 @@ For detailed information on Lambda integration, see:
 
 ## 🏗️ Architecture
 
+### System Flow
+
+```
+External Monitoring Systems (AWS/Azure/GCP/On-Prem)
+                    ↓
+            Adapter/Webhook
+                    ↓
+            M-LADS API Server
+                    ↓
+      AI Analysis & Decision Engine
+                    ↓
+        ┌───────────┴───────────┐
+        ↓                       ↓
+  Automated Fix           Human Assignment
+  (Lambda Functions)      (Engineer Notification)
+        ↓                       ↓
+    Status Update           Slack Alert
+        └───────────┬───────────┘
+                    ↓
+          Dashboard Interface
+```
+
+### Component Architecture
+
 ```
 ┌─────────────┐      ┌─────────────┐      ┌──────────────┐
 │   React     │─────▶│   Express   │─────▶│   MongoDB    │
@@ -218,11 +277,18 @@ For detailed information on Lambda integration, see:
                      │AWS Lambda   │
                      │  Functions  │
                      └─────────────┘
+                            │
+                            ▼
+                     ┌─────────────┐
+                     │    Slack    │
+                     │Notifications│
+                     └─────────────┘
 ```
 
 ## 👥 Team
 
 Developed during a Chas Academy hackathon project (FJS24).
+Mladen Kovacic, Simon Kaneborn, Moa Sjögren, Adreas Johansson, Erik Andersson, Felix Olsson Stenersjö, Emil Rönnkvist, Sara J Pallander, Kristoffer Benckert
 
 ## 📚 Additional Resources
 
