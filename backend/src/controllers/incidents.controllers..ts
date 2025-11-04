@@ -51,6 +51,7 @@ export class IncidentController {
       return res.status(500).json({ error });
     }
   }
+    
 }
 
 export default IncidentController;
