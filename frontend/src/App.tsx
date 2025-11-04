@@ -2,29 +2,71 @@
 // APP - Root-komponent
 // ============================================
 
-// SYFTE:
-// Detta är huvudkomponenten för hela applikationen.
-// Här hanteras hämtning av data och state för incidenter.
+import { useState, useEffect } from 'react';
+import StatusMessages from './components/StatusMessages';
+import { StatusMessage } from './types/StatusMessage';
 
-// UPPGIFT - STEG 1: Skapa state för incidenter
-// Använd useState för att lagra:
-// - incidents: array med alla incidenter
-// - loading: boolean som visar om data laddas
-// - error: eventuella felmeddelanden
+function App() {
+  const [messages, setMessages] = useState<StatusMessage[]>([]);
+  const [loading, setLoading] = useState(true);
 
-// UPPGIFT - STEG 2: Hämta incidenter från backend
-// Använd useEffect för att hämta data när komponenten laddas:
-// - Fetch från: http://localhost:3001/api/incidents
-// - Uppdatera incidents-state med resultatet
-// - Sätt loading till false när data är hämtad
-// - Hantera fel om backend inte svarar
+  useEffect(() => {
+    // Simulerad data för statusmeddelanden
+    // I en verklig applikation skulle detta hämtas från en API
+    const mockMessages: StatusMessage[] = [
+      {
+        id: '1',
+        title: 'Systemfel upptäckt',
+        message: 'Ett kritiskt systemfel har upptäckts i produktionsmiljön. Omedelbar åtgärd krävs.',
+        status: 'critical',
+        timestamp: new Date().toISOString(),
+      },
+      {
+        id: '2',
+        title: 'Hög belastning på servern',
+        message: 'Servern upplever en hög belastning. Övervaka systemet noga.',
+        status: 'danger',
+        timestamp: new Date(Date.now() - 3600000).toISOString(),
+      },
+      {
+        id: '3',
+        title: 'Alla system fungerar normalt',
+        message: 'Alla system är igång och fungerar som förväntat. Inga problem rapporterade.',
+        status: 'ok',
+        timestamp: new Date(Date.now() - 7200000).toISOString(),
+      },
+      {
+        id: '4',
+        title: 'Säkerhetsvarning',
+        message: 'Misstänkt aktivitet upptäckt i systemet. Undersökning pågår.',
+        status: 'danger',
+        timestamp: new Date(Date.now() - 1800000).toISOString(),
+      },
+      {
+        id: '5',
+        title: 'Backup lyckades',
+        message: 'Daglig backup har slutförts utan problem.',
+        status: 'ok',
+        timestamp: new Date(Date.now() - 86400000).toISOString(),
+      },
+    ];
 
-// UPPGIFT - STEG 3: Rendera komponenter
-// - Visa en header med titel
-// - Visa NotificationBanner för kritiska incidenter (priority: "critical")
-// - Visa IncidentList med alla incidenter
-// - Visa laddningsmeddelande om loading är true
-// - Visa felmeddelande om error finns
+    // Simulera API-anrop
+    setTimeout(() => {
+      setMessages(mockMessages);
+      setLoading(false);
+    }, 500);
+  }, []);
 
-// Tips: Filtrera kritiska incidenter med array.filter()
-// Tips: Skicka data till komponenter via props
+  if (loading) {
+    return (
+      <div style={{ padding: '40px', textAlign: 'center' }}>
+        <p>Laddar statusmeddelanden...</p>
+      </div>
+    );
+  }
+
+  return <StatusMessages messages={messages} />;
+}
+
+export default App;
