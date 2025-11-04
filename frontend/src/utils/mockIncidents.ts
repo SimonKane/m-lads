@@ -17,15 +17,14 @@ export const mockIncidents: Incident[] = [
     status: 'investigating',
     priority: 'critical',
     createdAt: new Date('2025-01-04T08:30:00').toISOString(),
-    assignedUser: null, // No user assigned since AI is handling it
-    aiStatus: 'assigned', // AI has been assigned to this incident
     aiAnalysis: {
       type: 'Database Performance',
       action: 'scale_up',
-      target: null,
+      target: 'database',
       priority: 'critical',
       recommendation:
         'Check connection pool settings and database server load. Consider scaling resources.',
+      assignedTo: 'AI Assistant',
     },
   },
   {
@@ -36,11 +35,6 @@ export const mockIncidents: Incident[] = [
     status: 'open',
     priority: 'high',
     createdAt: new Date('2025-01-04T09:15:00').toISOString(),
-    assignedUser: {
-      id: '2',
-      name: 'Johan',
-      specialization: 'API & Performance',
-    },
     aiAnalysis: {
       type: 'API Integration',
       action: 'notify_human',
@@ -48,6 +42,7 @@ export const mockIncidents: Incident[] = [
       priority: 'high',
       recommendation:
         'Implement request throttling and caching strategy for API calls.',
+      assignedTo: null,
     },
   },
   {
@@ -57,15 +52,14 @@ export const mockIncidents: Incident[] = [
     status: 'resolved',
     priority: 'medium',
     createdAt: new Date('2025-01-03T14:20:00').toISOString(),
-    assignedUser: null, // No user assigned since AI fixed it
-    aiStatus: 'resolved', // AI has already fixed this issue
     aiAnalysis: {
       type: 'Cache Performance',
       action: 'clear_cache',
-      target: null,
+      target: 'cache',
       priority: 'medium',
       recommendation:
         'Clear cache and monitor memory usage. Consider implementing cache eviction policies.',
+      assignedTo: 'AI Assistant',
     },
   },
   {
@@ -75,11 +69,6 @@ export const mockIncidents: Incident[] = [
     status: 'open',
     priority: 'high',
     createdAt: new Date('2025-01-04T07:00:00').toISOString(),
-    assignedUser: {
-      id: '1',
-      name: 'Anna',
-      specialization: 'Database & Backend',
-    },
     aiAnalysis: {
       type: 'Security',
       action: 'notify_human',
@@ -87,6 +76,7 @@ export const mockIncidents: Incident[] = [
       priority: 'high',
       recommendation:
         'Renew SSL certificate immediately to prevent service disruption.',
+      assignedTo: null,
     },
   },
   {
@@ -96,8 +86,6 @@ export const mockIncidents: Incident[] = [
     status: 'closed',
     priority: 'low',
     createdAt: new Date('2025-01-02T11:45:00').toISOString(),
-    assignedUser: null, // No user assigned for low priority incident
-    aiStatus: 'resolved', // AI has already fixed this issue
     aiAnalysis: {
       type: 'Frontend',
       action: 'none',
@@ -105,6 +93,7 @@ export const mockIncidents: Incident[] = [
       priority: 'low',
       recommendation:
         'CSS media query adjustment needed for responsive design.',
+      assignedTo: 'AI Assistant',
     },
   },
 ];

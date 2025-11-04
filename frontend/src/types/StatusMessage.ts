@@ -16,11 +16,7 @@ export interface StatusMessage {
   action: StatusAction;
   target: string | null;
   recommendation: string;
-  assignedUser: {
-    id: string;
-    name: string;
-    specialization: string;
-  } | null;
+  assignedTo: string | null; // From aiAnalysis.assignedTo
   aiStatus: AIStatus;
   status: ReportStatus;
 }

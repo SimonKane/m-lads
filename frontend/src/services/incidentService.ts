@@ -23,11 +23,27 @@ export async function fetchIncidents(): Promise<Incident[]> {
     clearTimeout(timeoutId);
     
     if (!response.ok) {
+      // Handle 404 case (no incidents found)
+      if (response.status === 404) {
+        return [];
+      }
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    const data = await response.json();
-    return data;
+    const result = await response.json();
+    
+    // Backend returns { data: incidents[] } or { message: "..." }
+    if (result.data && Array.isArray(result.data)) {
+      return result.data;
+    }
+    
+    // Fallback: if response is directly an array
+    if (Array.isArray(result)) {
+      return result;
+    }
+    
+    // If no data found, return empty array
+    return [];
   } catch (error) {
     clearTimeout(timeoutId);
     
@@ -46,14 +62,27 @@ export async function fetchIncidents(): Promise<Incident[]> {
  */
 export async function fetchIncidentById(id: string): Promise<Incident> {
   try {
-    const response = await fetch(`${API_BASE_URL}/incidents/${id}`);
+    const response = await fetch(`${API_BASE_URL}/incidents/${id}/`);
     
     if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error(`Incident ${id} not found`);
+      }
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    const data = await response.json();
-    return data;
+    const result = await response.json();
+    
+    // Backend returns { incident: ... } or { data: ... }
+    if (result.incident) {
+      return result.incident;
+    }
+    if (result.data) {
+      return result.data;
+    }
+    
+    // Fallback: if response is directly the incident
+    return result;
   } catch (error) {
     console.error(`Error fetching incident ${id}:`, error);
     throw error;

@@ -283,15 +283,11 @@ const StatusMessages = ({ messages }: StatusMessagesProps) => {
               <p className="message-content">{msg.description}</p>
 
               <div className="message-details">
-                {msg.assignedUser && !msg.aiStatus && (
+                {msg.assignedTo && !msg.aiStatus && (
                   <div className="detail-row assigned-user">
                     <strong>Assigned to:</strong>
                     <span className="user-badge">
-                      <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor">
-                        <path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-240q-33 0-56.5-23.5T160-480q0-33 23.5-56.5T240-560q33 0 56.5 23.5T320-480q0 33-23.5 56.5T240-400Zm480 0q-33 0-56.5-23.5T640-480q0-33 23.5-56.5T720-560q33 0 56.5 23.5T800-480q0 33-23.5 56.5T720-400Zm40 240v-112q0-19-9-36t-23-29q-10-5-22-9t-26-4q-38 0-73 9t-67 26q-11 8-22.5 13.5T519-300q-11 0-22.5-5.5T474-319q-28-17-59-26t-65-9q-66 0-123.5 25T161-238q-6 4-8.5 11t-2.5 14v112h640Z"/>
-                      </svg>
-                      {msg.assignedUser.name}
-                      <span className="user-specialization">({msg.assignedUser.specialization})</span>
+                      {msg.assignedTo}
                     </span>
                   </div>
                 )}
