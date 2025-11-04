@@ -24,11 +24,6 @@ export interface Incident {
     target: string | null;
     priority: string;
     recommendation: string;
+    assignedTo?: string | null;
   };
-  assignedUser?: {
-    id: string;
-    name: string;
-    specialization: string;
-  } | null;
-  aiStatus?: 'assigned' | 'resolved' | null;
 }

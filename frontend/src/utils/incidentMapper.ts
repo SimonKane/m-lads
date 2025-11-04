@@ -28,10 +28,30 @@ function mapAiTypeToStatusType(aiType: string): StatusType {
 }
 
 /**
+ * Determines AI status based on assignedTo and incident status
+ */
+function determineAIStatus(assignedTo: string | null | undefined, status: Incident['status']): 'assigned' | 'resolved' | null {
+  // If status is resolved or closed, AI has resolved it
+  if (status === 'resolved' || status === 'closed') {
+    // If it was assigned to AI, mark as resolved
+    if (assignedTo && assignedTo.toLowerCase().includes('ai')) {
+      return 'resolved';
+    }
+  }
+  // If assignedTo exists and contains AI, mark as assigned
+  if (assignedTo && assignedTo.toLowerCase().includes('ai')) {
+    return 'assigned';
+  }
+  return null;
+}
+
+/**
  * Converts an Incident to a StatusMessage
  */
 export function convertIncidentToStatusMessage(incident: Incident): StatusMessage {
   const aiAnalysis = incident.aiAnalysis;
+  const assignedTo = aiAnalysis?.assignedTo || null;
+  const aiStatus = determineAIStatus(assignedTo, incident.status);
   
   return {
     title: incident.title,
@@ -41,8 +61,8 @@ export function convertIncidentToStatusMessage(incident: Incident): StatusMessag
     action: aiAnalysis?.action || 'none',
     target: aiAnalysis?.target || null,
     recommendation: aiAnalysis?.recommendation || '',
-    assignedUser: incident.assignedUser || null,
-    aiStatus: incident.aiStatus || null,
+    assignedTo: assignedTo,
+    aiStatus: aiStatus,
     status: incident.status,
   };
 }
