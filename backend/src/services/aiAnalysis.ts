@@ -16,21 +16,21 @@ const client = new OpenAI({
   },
 });
 
-// Normalisera rådata från monitoring-system till Incident-format
+// Normalize raw data from monitoring system to Incident format
 export async function normalizeRawData(rawData: any): Promise<Incident> {
-  const prompt = `Du är en AI som normaliserar övervakningsdata till ett strukturerat incident-format.
+  const prompt = `You are an AI that normalizes surveillance data into a structured incident format.
 
-Läs följande rådata och skapa en incident-beskrivning på svenska.
+Read the following raw data and create an incident description.
 
-Svara ENDAST med ett JSON-objekt i detta format (ingen annan text):
+Respond ONLY with a JSON object in this format (no other text):
 {
-  "title": "Kort, beskrivande titel på svenska (max 10 ord)",
-  "description": "Detaljerad beskrivning som sammanfattar problemet, inkludera relevant info från logs och metrics",
+  "title": "Short, describing title (maximum 10 words)",
+  "description": "detailed description that summarizes the problem, include all relevant info from the logs and metrics",
   "status": "open",
   "priority": "critical" | "high" | "medium" | "low"
 }
 
-Rådata:
+Raw data:
 ${JSON.stringify(rawData, null, 2)}`;
 
   try {
@@ -47,12 +47,12 @@ ${JSON.stringify(rawData, null, 2)}`;
 
     const responseText = completion.choices[0].message.content;
     if (!responseText) {
-      throw new Error("Ingen respons från AI");
+      throw new Error("No response from ai AI");
     }
 
     const normalized = JSON.parse(responseText);
 
-    // Skapa ett komplett Incident-objekt
+    // Create a complete Incident object
     const incident: Incident = {
       id: `incident-${Date.now()}`,
       title: normalized.title,
@@ -64,12 +64,12 @@ ${JSON.stringify(rawData, null, 2)}`;
 
     return incident;
   } catch (error) {
-    console.error("Fel vid normalisering:", error);
+    console.error("Error during normalizing:", error);
     // Fallback
     return {
       id: `incident-${Date.now()}`,
-      title: "Okänd incident",
-      description: `Rådata kunde inte normaliseras: ${JSON.stringify(
+      title: "unknown incident",
+      description: `Raw data could not be normalized: ${JSON.stringify(
         rawData
       ).substring(0, 200)}`,
       status: "open",
@@ -82,38 +82,38 @@ ${JSON.stringify(rawData, null, 2)}`;
 export async function analyzeIncident(
   incident: Incident
 ): Promise<AssignmentResult> {
-  // Skapa en lista av tillgänglig personal
+  // Create a list of available staff
   const staffList = itStaff
     .map((person) => `- ${person.name} (${person.specialization})`)
     .join("\n");
 
-  const prompt = `Du är en AI som analyserar IT-incidenter och tilldelar dem till rätt IT-personal.
+  const prompt = `You are an AI that analyzes IT-incidents and assigns them to the correct IT-staff.
 
-Tillgänglig personal:
+Available staff:
 ${staffList}
+Read the text below and classify the incident according to the following rules:
 
-Läs texten nedan och klassificera incidenten enligt följande regler:
+- If the incident involves "down", "crashed" → type: "server_down", priority: "critical", action: "restart_service"
+- If the incident involves "cpu", "slow" → type: "high_cpu", priority: "high", action: "scale_up"
+- If the incident involves "memory", "leak" → type: "memory_leak", priority: "high", action: "clear_cache"
+- Otherwise → type: "unknown", priority: "medium", action: "notify_human"
 
-- Om det handlar om "down", "crashed" → type: "server_down", priority: "critical", action: "restart_service"
-- Om det handlar om "cpu", "slow" → type: "high_cpu", priority: "high", action: "scale_up"
-- Om det handlar om "memory", "leak" → type: "memory_leak", priority: "high", action: "clear_cache"
-- Annars → type: "unknown", priority: "medium", action: "notify_human"
+Assign the incident to the person who's specialization suits the incident best.
 
-Tilldela incidenten till den person vars specialisering passar bäst.
+Answer ONLY with a JSON-object in this format (no other text):
 
-Svara ENDAST med ett JSON-objekt i detta format (ingen annan text):
 {
   "type": "server_down" | "high_cpu" | "memory_leak" | "unknown",
   "priority": "critical" | "high" | "medium" | "low",
   "action": "restart_service" | "scale_up" | "clear_cache" | "notify_human" | "none",
-  "target": "Namnet på den drabbade tjänsten/servern eller null",
-  "assignedTo": "Namnet på den person som ska hantera incidenten (Anna, Johan eller Lisa)",
-  "recommendation": "En kort svensk mening om vad som bör göras"
-}
+  "target": "Name of the affected service, otherwise null",
+  "assignedTo": "Name of the person who should handle the incident (Anna, Johan or Lisa)",
+  "recommendation": "A short description of what should be done"
+} 
 
 Incident:
-Titel: ${incident.title}
-Beskrivning: ${incident.description}`;
+Title: ${incident.title}
+Description: ${incident.description}`;
 
   try {
     const completion = await client.chat.completions.create({
@@ -129,14 +129,14 @@ Beskrivning: ${incident.description}`;
 
     const responseText = completion.choices[0].message.content;
     if (!responseText) {
-      throw new Error("Ingen respons från AI");
+      throw new Error("No response from AI");
     }
 
     const result = JSON.parse(responseText) as AssignmentResult;
     return result;
   } catch (error) {
-    console.error("Fel vid AI-analys:", error);
-    // Fallback vid fel
+    console.error("Error during AI-analysis:", error);
+    // Fallback in case of error
     return {
       type: "unknown",
       priority: "medium",
@@ -144,12 +144,12 @@ Beskrivning: ${incident.description}`;
       target: null,
       assignedTo: "AI Assistant",
       recommendation:
-        "Kunde inte analysera incidenten. Manuell granskning krävs.",
+        "Could not analyze the incident. Manual review required.",
     };
   }
 }
 
-// Skicka notifikation till Slack när någon tilldelas en incident
+// Send notification to Slack when someone is assigned an incident
 export async function notifyAssignedPerson(
   incident: Incident,
   analysis: AssignmentResult
@@ -157,34 +157,34 @@ export async function notifyAssignedPerson(
   const webhookUrl = process.env.SLACK_WEBHOOK_URL;
 
   if (!webhookUrl) {
-    console.error("❌ SLACK_WEBHOOK_URL är inte konfigurerad i .env");
+    console.error("❌ SLACK_WEBHOOK_URL is not configured in .env");
     return;
   }
 
-  // Hitta den tilldelade personen för att få mer information
+  // Find the assigned person to get more information
   const assignedPerson = itStaff.find(
     (person) => person.name === analysis.assignedTo
   );
 
-  // Skapa ett formaterat meddelande
-  const message = `❗️ *Ny incident tilldelad: @${analysis.assignedTo}*
+  // Create a formatted message
+  const message = `❗️ *New incident assigned: @${analysis.assignedTo}*
 
 *Incident:* ${incident.title}
 *ID:* ${incident.id}
-*Prioritet:* ${analysis.priority.toUpperCase()}
-*Typ:* ${analysis.type}
-*Mål:* ${analysis.target || "N/A"}
+*Priority:* ${analysis.priority.toUpperCase()}
+*Type:* ${analysis.type}
+*Target:* ${analysis.target || "N/A"}
 
-*Beskrivning:*
+*Description:*
 ${incident.description}
 
-*Rekommenderad åtgärd:* ${analysis.action}
-*Rekommendation:*
+*Recommended action:* ${analysis.action}
+*Recommendation:*
 ${analysis.recommendation}
 
-${assignedPerson ? `*Specialisering:* ${assignedPerson.specialization}` : ""}
+${assignedPerson ? `*Specialization:* ${assignedPerson.specialization}` : ""}
 
-*Skapad:* ${incident.createdAt.toISOString()}`;
+*Created:* ${incident.createdAt.toISOString()}`;
 
   try {
     const response = await fetch(webhookUrl, {
@@ -201,11 +201,11 @@ ${assignedPerson ? `*Specialisering:* ${assignedPerson.specialization}` : ""}
       throw new Error(`Slack API error: ${response.statusText}`);
     }
 
-    console.log(`Slack-notifikation skickad till ${analysis.assignedTo}!`);
+    console.log(`Slack notification sent to ${analysis.assignedTo}!`);
   } catch (error) {
-    console.error("Misslyckades att skicka till Slack:", error);
+    console.error("Failed to send to Slack:", error);
   }
 }
 
-// Default export för bakåtkompatibilitet
+// Default export for backwards compatibility
 export default analyzeIncident;
