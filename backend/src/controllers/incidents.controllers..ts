@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { incidentArray } from "../models/incidentModel";
+import analyzeIncident  from "../services/aiAnalysis";
+import { IncidentSchema } from "../types/zod";
 
 const copiedIncidentArray = [...incidentArray];
 
@@ -18,7 +20,12 @@ export class IncidentController {
     const { title, description } = req.body;
     try {
       const newIncident = await analyzeIncident(title, description);
-      copiedIncidentArray.push(newIncident);
+      let parsedIncident = IncidentSchema.safeParse(newIncident);
+      if (!parsedIncident.success) {
+        //TODO: Handle if AI outputs incorrect format
+        return res.status(500).json({ message: "AI output format error" });
+    }
+      copiedIncidentArray.push(parsedIncident);
 
       attemptFix(newIncident);
 
