@@ -18,7 +18,7 @@ export class IncidentController {
   }
 
   async createNewIncident(req: Request, res: Response) {
-    const { title, description } = req.body;
+    const { description } = req.body;
     try {
       const normalizedIncident = await normalizeRawData(description);
       const aiAnalysis = await analyzeIncident(normalizedIncident);
