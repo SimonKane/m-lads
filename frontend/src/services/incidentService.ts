@@ -88,3 +88,35 @@ export async function fetchIncidentById(id: string): Promise<Incident> {
     throw error;
   }
 }
+
+export async function getIncidents(): Promise<any[]> {
+    const res = await fetch('http://localhost:3000/incidents', {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+    });
+    if (!res.ok) {
+        const body = await res.text();
+        throw new Error(`Failed to fetch incidents: ${res.status} ${body}`);
+    }
+    return res.json();
+}
+
+export async function createIncident(description: string): Promise<any> {
+    const res = await fetch('http://localhost:3000/incidents', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ description })
+    });
+
+    const text = await res.text();
+    let parsed: any;
+    try { parsed = JSON.parse(text); } catch { parsed = text; }
+
+    if (!res.ok) {
+        throw { status: res.status, body: parsed };
+    }
+    return parsed;
+}
