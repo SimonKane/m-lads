@@ -43,6 +43,7 @@ export function convertIncidentToStatusMessage(incident: Incident): StatusMessag
     recommendation: aiAnalysis?.recommendation || '',
     assignedUser: incident.assignedUser || null,
     aiStatus: incident.aiStatus || null,
+    status: incident.status,
   };
 }
 

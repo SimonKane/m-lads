@@ -6,6 +6,7 @@ export type StatusType = 'server_down' | 'high_cpu' | 'memory_leak' | 'network_i
 export type StatusPriority = 'critical' | 'high' | 'medium' | 'low';
 export type StatusAction = 'restart_service' | 'scale_up' | 'clear_cache' | 'notify_human' | 'none';
 export type AIStatus = 'assigned' | 'resolved' | null;
+export type ReportStatus = 'open' | 'investigating' | 'resolved' | 'closed';
 
 export interface StatusMessage {
   title: string;
@@ -21,4 +22,5 @@ export interface StatusMessage {
     specialization: string;
   } | null;
   aiStatus: AIStatus;
+  status: ReportStatus;
 }
