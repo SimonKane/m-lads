@@ -14,7 +14,7 @@ export interface Incident {
       | "clear_cache"
       | "notify_human"
       | "none"
-    target: string | null
+    target: "database" | "api" | "cache" | "auth-service" | null
     priority: string
     recommendation: string
   }
@@ -47,7 +47,7 @@ export const incidentArray: Incident[] = [
     aiAnalysis: {
       type: "Database Performance",
       action: "scale_up",
-      target: null,
+      target: "database",
       priority: "critical",
       recommendation:
         "Check connection pool settings and database server load. Consider scaling resources.",
@@ -80,7 +80,7 @@ export const incidentArray: Incident[] = [
     aiAnalysis: {
       type: "Cache Performance",
       action: "clear_cache",
-      target: null,
+      target: "cache",
       priority: "medium",
       recommendation:
         "Clear cache and monitor memory usage. Consider implementing cache eviction policies.",
