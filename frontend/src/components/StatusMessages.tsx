@@ -4,6 +4,7 @@
 
 import { useState } from "react";
 import { StatusMessage } from "../types/StatusMessage";
+import "./statusMessages.css";
 
 interface StatusMessagesProps {
   messages: StatusMessage[];
@@ -13,16 +14,17 @@ type FilterType = "all" | "critical" | "danger" | "ok";
 
 const StatusMessages = ({ messages }: StatusMessagesProps) => {
   const [filter, setFilter] = useState<FilterType>("all");
+  
   const getStatusColor = (status: StatusMessage["status"]) => {
     switch (status) {
       case "critical":
-        return "#dc3545"; // Röd
+        return "critical";
       case "danger":
-        return "#ffc107"; // Gul
+        return "danger";
       case "ok":
-        return "#28a745"; // Grön
+        return "ok";
       default:
-        return "#6c757d"; // Grå
+        return "default";
     }
   };
 
@@ -39,148 +41,70 @@ const StatusMessages = ({ messages }: StatusMessagesProps) => {
     }
   };
 
-  // Filtrera meddelanden baserat på vald status
   const filteredMessages =
     filter === "all"
       ? messages
       : messages.filter((msg) => msg.status === filter);
 
   return (
-    <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
-      <h1 style={{ marginBottom: "20px", color: "#333" }}>Statusmeddelanden</h1>
+    <div className="statusMsg-container">
+      <h1 className="status-heading">Statusmeddelanden</h1>
 
-      {/* Filtreringsmeny */}
-      <div
-        style={{
-          display: "flex",
-          gap: "10px",
-          marginBottom: "30px",
-          flexWrap: "wrap",
-        }}
-      >
+      <div className="filter-menu">
         <button
           onClick={() => setFilter("all")}
-          style={{
-            padding: "10px 20px",
-            borderRadius: "6px",
-            border: filter === "all" ? "2px solid #007bff" : "2px solid #ddd",
-            backgroundColor: filter === "all" ? "#007bff" : "#fff",
-            color: filter === "all" ? "#fff" : "#333",
-            fontWeight: filter === "all" ? "bold" : "normal",
-            cursor: "pointer",
-            transition: "all 0.2s",
-          }}
+          className={`filter-button ${filter === "all" ? "active" : ""}`}
         >
           Alla ({messages.length})
         </button>
 
         <button
           onClick={() => setFilter("critical")}
-          style={{
-            padding: "10px 20px",
-            borderRadius: "6px",
-            border:
-              filter === "critical" ? "2px solid #dc3545" : "2px solid #ddd",
-            backgroundColor: filter === "critical" ? "#dc3545" : "#fff",
-            color: filter === "critical" ? "#fff" : "#333",
-            fontWeight: filter === "critical" ? "bold" : "normal",
-            cursor: "pointer",
-            transition: "all 0.2s",
-          }}
+          className={`filter-button ${filter === "critical" ? "active critical" : ""}`}
         >
           Kritisk ({messages.filter((m) => m.status === "critical").length})
         </button>
 
         <button
           onClick={() => setFilter("danger")}
-          style={{
-            padding: "10px 20px",
-            borderRadius: "6px",
-            border:
-              filter === "danger" ? "2px solid #ffc107" : "2px solid #ddd",
-            backgroundColor: filter === "danger" ? "#ffc107" : "#fff",
-            color: filter === "danger" ? "#fff" : "#333",
-            fontWeight: filter === "danger" ? "bold" : "normal",
-            cursor: "pointer",
-            transition: "all 0.2s",
-          }}
+          className={`filter-button ${filter === "danger" ? "active danger" : ""}`}
         >
           Varning ({messages.filter((m) => m.status === "danger").length})
         </button>
 
         <button
           onClick={() => setFilter("ok")}
-          style={{
-            padding: "10px 20px",
-            borderRadius: "6px",
-            border: filter === "ok" ? "2px solid #28a745" : "2px solid #ddd",
-            backgroundColor: filter === "ok" ? "#28a745" : "#fff",
-            color: filter === "ok" ? "#fff" : "#333",
-            fontWeight: filter === "ok" ? "bold" : "normal",
-            cursor: "pointer",
-            transition: "all 0.2s",
-          }}
+          className={`filter-button ${filter === "ok" ? "active ok" : ""}`}
         >
           OK ({messages.filter((m) => m.status === "ok").length})
         </button>
       </div>
 
       {filteredMessages.length === 0 ? (
-        <p style={{ color: "#666", textAlign: "center", padding: "40px" }}>
+        <p className="empty-message">
           {messages.length === 0
             ? "Inga statusmeddelanden för tillfället."
             : "Inga meddelanden matchar det valda filtret."}
         </p>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        <div className="message-list">
           {filteredMessages.map((msg) => (
             <div
               key={msg.id}
-              style={{
-                border: `2px solid ${getStatusColor(msg.status)}`,
-                borderRadius: "8px",
-                padding: "16px",
-                backgroundColor: "#fff",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-              }}
+              className={`message-card ${getStatusColor(msg.status)}`}
+              
             >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                  marginBottom: "12px",
-                }}
-              >
-                <h2 style={{ margin: 0, color: "#333", fontSize: "18px" }}>
-                  {msg.title}
-                </h2>
-                <span
-                  style={{
-                    backgroundColor: getStatusColor(msg.status),
-                    color: "#fff",
-                    padding: "4px 12px",
-                    borderRadius: "12px",
-                    fontSize: "12px",
-                    fontWeight: "bold",
-                    textTransform: "uppercase",
-                  }}
-                >
+              <div className="message-header">
+                <h2 className="message-title">{msg.title}</h2>
+                <span className={`status-badge ${getStatusColor(msg.status)}`}>
+                  {(msg.status === "danger" || msg.status === "critical") ? <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="#FFFFFF"><path d="m40-120 440-760 440 760H40Zm138-80h604L480-720 178-200Zm302-40q17 0 28.5-11.5T520-280q0-17-11.5-28.5T480-320q-17 0-28.5 11.5T440-280q0 17 11.5 28.5T480-240Zm-40-120h80v-200h-80v200Zm40-100Z"/></svg> : <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="#FFFFFF"><path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z"/></svg>}
                   {getStatusLabel(msg.status)}
                 </span>
               </div>
 
-              <p
-                style={{
-                  margin: "0 0 8px 0",
-                  color: "#666",
-                  lineHeight: "1.5",
-                }}
-              >
-                {msg.message}
-              </p>
+              <p className="message-content">{msg.message}</p>
 
-              <span style={{ fontSize: "12px", color: "#999" }}>
+              <span className="message-timestamp">
                 {new Date(msg.timestamp).toLocaleString("sv-SE")}
               </span>
             </div>

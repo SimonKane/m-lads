@@ -1,0 +1,156 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+
+:root {
+    --critical: #d90b3b;
+    --warning: #fbbc00;
+    --ok: #07b42f;
+    --action-default: #3f87fb;
+}
+
+.statusMsg-container {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  font-family: Arial;
+  background-color: #f8f4f4;
+}
+
+.statusMsg-container > * {
+    font-family: 'Outfit', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.status-heading {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.filter-menu {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.filter-button {
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: 2px solid #ddd;
+  background-color: #fff;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-button.active {
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.filter-button.active.critical {
+  border-color: var(--critical);
+  background-color: var(--critical);
+}
+
+.filter-button.active.danger {
+  border-color: var(--warning);
+  background-color: var(--warning);
+}
+
+.filter-button.active.ok {
+  border-color: var(--ok);
+  background-color: var(--ok);
+}
+
+.filter-button.active {
+  border-color: var(--action-default);
+  background-color: var(--action-default);
+}
+
+.empty-message {
+  color: #666;
+  text-align: center;
+  padding: 40px;
+}
+
+.message-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 22px;
+  border-radius: 12px;
+  background-color: white;
+}
+
+.message-card {
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #fff;
+box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;}
+
+.message-card.critical {
+  border-bottom: 8px solid var(--critical);
+}
+
+.message-card.danger {
+  border-bottom: 8px solid var(--warning);
+}
+
+.message-card.ok {
+  border-bottom: 8px solid var(--ok);
+}
+
+.message-card.default {
+  border: 2px solid #6c757d;
+}
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.message-title {
+  margin: 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.status-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.status-badge.critical {
+  background-color: var(--critical);
+}
+
+.status-badge.danger {
+  background-color: var(--warning);
+}
+
+.status-badge.ok {
+  background-color: var(--ok);
+}
+
+.status-badge.default {
+  background-color: #6c757d;
+}
+
+.message-content {
+  margin: 0 0 8px 0;
+  color: #666;
+  line-height: 1.5;
+}
+
+.message-timestamp {
+  font-size: 12px;
+  color: #999;
+}
